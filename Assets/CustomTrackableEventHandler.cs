@@ -6,26 +6,42 @@ using UnityEngine.Video;
 public class CustomTrackableEventHandler : DefaultTrackableEventHandler
 {
   public bool isVideoEnabled;
+  public string url;
+
   [Space]
-  public VideoPlayer videoPlayer;
-  public RawImage rawImage;
+  public GameObject videoGO;
+  private VideoPlayer _videoPlayer;
+  private RawImage _rawImage;
+
+  private Button _interactionBtn;
+
+
+
+  private void Awake(){
+    _interactionBtn = videoGO.GetComponent<Button>();
+    _videoPlayer = videoGO.GetComponent<VideoPlayer>();
+    _rawImage = videoGO.GetComponent<RawImage>();
+  }
 
     protected override void Start()
     {
         base.Start();
+
+        _interactionBtn.onClick.AddListener(OpenUrl);
+
     StartCoroutine(PrepareVideo());
     }
 
   private IEnumerator PrepareVideo()
   {
-    videoPlayer.Prepare();
+    _videoPlayer.Prepare();
 
-    while (!videoPlayer.isPrepared)
+    while (!_videoPlayer.isPrepared)
     {
       yield return new WaitForSeconds(.5f);
     }
 
-    rawImage.texture = videoPlayer.texture;
+    _rawImage.texture = _videoPlayer.texture;
 
     isVideoEnabled = true;
   }
@@ -33,12 +49,16 @@ public class CustomTrackableEventHandler : DefaultTrackableEventHandler
     protected override void OnTrackingFound()
     {
         base.OnTrackingFound();
-        if(isVideoEnabled) videoPlayer.Play();
+        if(isVideoEnabled) _videoPlayer.Play();
     }
 
     protected override void OnTrackingLost()
     {
         base.OnTrackingLost();
-        if(isVideoEnabled) videoPlayer.Pause();
+        if(isVideoEnabled) _videoPlayer.Pause();
+    }
+
+    private void OpenUrl(){
+      Application.OpenURL(url);
     }
 }
